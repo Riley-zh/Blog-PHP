@@ -1,0 +1,20 @@
+# Dependencies
+/vendor/
+/node_modules/
+
+# Environment variables
+.env
+
+# IDE
+/.idea/
+/.vscode/
+
+# Logs
+/storage/logs/*.log
+
+# Cache
+/storage/cache/
+
+# OS generated files
+Thumbs.db
+.DS_Store
