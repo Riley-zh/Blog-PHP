@@ -1,5 +1,10 @@
 # 现代PHP博客内容管理系统 (Modern PHP Blog CMS)
 
+[](https://github.com/Riley-zh/Blog-PHP/actions/workflows/ci.yml)
+[](https://github.com/phpstan/phpstan)
+[](https://opensource.org/licenses/MIT)
+[](https://php.net/)
+
 一个高性能、现代化的PHP博客内容管理系统，专为性能和可扩展性而设计。
 
 ## 功能特性
