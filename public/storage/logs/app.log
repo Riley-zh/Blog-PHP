@@ -46,3 +46,11 @@
 [2025-09-24 22:23:54] INFO: Request handled successfully {"method":"HEAD","uri":"\/","status":404}
 [2025-09-24 22:24:37] INFO: Application started
 [2025-09-24 22:24:37] INFO: Request handled successfully {"method":"HEAD","uri":"\/posts","status":404}
+[2025-09-24 22:33:48] INFO: Application started
+[2025-09-24 22:33:48] INFO: Request handled successfully {"method":"GET","uri":"\/","status":200}
+[2025-09-24 22:33:55] INFO: Application started
+[2025-09-24 22:33:55] INFO: Request handled successfully {"method":"GET","uri":"\/posts","status":500}
+[2025-09-26T12:38:09.084079+08:00] app.INFO: Application started [] []
+[2025-09-26T12:38:09.087968+08:00] app.INFO: Request handled successfully {"method":"GET","uri":"/","status":200} []
+[2025-09-26T12:38:15.897805+08:00] app.INFO: Application started [] []
+[2025-09-26T12:38:15.904012+08:00] app.INFO: Request handled successfully {"method":"GET","uri":"/posts","status":500} []

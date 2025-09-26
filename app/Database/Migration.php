@@ -58,9 +58,28 @@ class Migration
             if (class_exists($className)) {
                 $migration = new $className($this->pdo);
                 if (method_exists($migration, 'up')) {
-                    $migration->up();
-                    $this->markMigrationAsRun($migrationName);
-                    echo "Ran migration: {$migrationName}\n";
+                    try {
+                        if (!$this->pdo->inTransaction()) {
+                            $this->pdo->beginTransaction();
+                            $started = true;
+                        } else {
+                            $started = false;
+                        }
+
+                        $migration->up();
+                        $this->markMigrationAsRun($migrationName);
+
+                        if ($started) {
+                            $this->pdo->commit();
+                        }
+
+                        echo "Ran migration: {$migrationName}\n";
+                    } catch (\Throwable $e) {
+                        if ($this->pdo->inTransaction()) {
+                            $this->pdo->rollBack();
+                        }
+                        echo "Failed migration: {$migrationName} - " . $e->getMessage() . "\n";
+                    }
                 }
             }
         }

@@ -78,10 +78,29 @@ abstract class Model
         $placeholders = ':' . implode(', :', array_keys($data));
         
         $sql = "INSERT INTO {$this->table} ({$columns}) VALUES ({$placeholders})";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($data);
-        
-        return (int) $this->db->lastInsertId();
+        try {
+            if (!$this->db->inTransaction()) {
+                $this->db->beginTransaction();
+                $started = true;
+            } else {
+                $started = false;
+            }
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($data);
+            $id = (int) $this->db->lastInsertId();
+
+            if ($started) {
+                $this->db->commit();
+            }
+
+            return $id;
+        } catch (\Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $e;
+        }
     }
 
     /**
@@ -113,8 +132,28 @@ abstract class Model
         $setStr = implode(', ', $setClause);
         
         $sql = "UPDATE {$this->table} SET {$setStr} WHERE {$this->primaryKey} = :{$this->primaryKey}";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute($params);
+        try {
+            if (!$this->db->inTransaction()) {
+                $this->db->beginTransaction();
+                $started = true;
+            } else {
+                $started = false;
+            }
+
+            $stmt = $this->db->prepare($sql);
+            $result = $stmt->execute($params);
+
+            if ($started) {
+                $this->db->commit();
+            }
+
+            return $result;
+        } catch (\Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $e;
+        }
     }
 
     /**
@@ -123,8 +162,28 @@ abstract class Model
     public function delete(int $id): bool
     {
         $sql = "DELETE FROM {$this->table} WHERE {$this->primaryKey} = :id";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute(['id' => $id]);
+        try {
+            if (!$this->db->inTransaction()) {
+                $this->db->beginTransaction();
+                $started = true;
+            } else {
+                $started = false;
+            }
+
+            $stmt = $this->db->prepare($sql);
+            $result = $stmt->execute(['id' => $id]);
+
+            if ($started) {
+                $this->db->commit();
+            }
+
+            return $result;
+        } catch (\Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $e;
+        }
     }
 
     /**

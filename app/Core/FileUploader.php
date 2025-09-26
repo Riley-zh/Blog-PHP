@@ -9,7 +9,7 @@ class FileUploader
     protected bool $overwrite = false;
     protected array $errors = [];
 
-    public function __construct(string $uploadPath = null)
+    public function __construct(?string $uploadPath = null)
     {
         $this->uploadPath = $uploadPath ?? dirname(__DIR__, 2) . '/storage/uploads';
         
@@ -49,7 +49,7 @@ class FileUploader
     /**
      * Upload a file
      */
-    public function upload(array $file, string $name = null): ?string
+    public function upload(array $file, ?string $name = null): ?string
     {
         $this->errors = [];
         
@@ -82,7 +82,7 @@ class FileUploader
     /**
      * Upload multiple files
      */
-    public function uploadMultiple(array $files, array $names = null): array
+    public function uploadMultiple(array $files, ?array $names = null): array
     {
         $uploadedFiles = [];
         

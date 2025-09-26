@@ -24,15 +24,38 @@ class User extends Model
         parent::__construct();
     }
 
+    protected function cache()
+    {
+        global $app;
+        if (isset($app)) {
+            try {
+                return $app->getService('cache');
+            } catch (\Throwable $e) {
+                return new \App\Core\Cache();
+            }
+        }
+        return new \App\Core\Cache();
+    }
+
     /**
      * Find a user by email
      */
     public function findByEmail(string $email)
     {
+        $cache = $this->cache();
+        $key = 'user_email_' . md5($email);
+        $data = $cache->get($key);
+        if ($data !== null) {
+            return $data;
+        }
         $sql = "SELECT * FROM {$this->table} WHERE email = :email LIMIT 1";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['email' => $email]);
-        return $stmt->fetch();
+        $data = $stmt->fetch();
+        if ($data) {
+            $cache->put($key, $data, 600);
+        }
+        return $data;
     }
 
     /**
@@ -40,10 +63,20 @@ class User extends Model
      */
     public function findByUsername(string $username)
     {
+        $cache = $this->cache();
+        $key = 'user_username_' . md5($username);
+        $data = $cache->get($key);
+        if ($data !== null) {
+            return $data;
+        }
         $sql = "SELECT * FROM {$this->table} WHERE username = :username LIMIT 1";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['username' => $username]);
-        return $stmt->fetch();
+        $data = $stmt->fetch();
+        if ($data) {
+            $cache->put($key, $data, 600);
+        }
+        return $data;
     }
 
     /**
@@ -56,7 +89,10 @@ class User extends Model
             $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
 
-        return $this->create($data);
+        $id = $this->create($data);
+        // invalidate any relevant cache
+        $this->cache()->clear();
+        return $id;
     }
 
     /**
@@ -83,6 +119,15 @@ class User extends Model
             $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
         
-        return $this->update($id, $data);
+        $res = $this->update($id, $data);
+        $this->cache()->clear();
+        return $res;
+    }
+
+    public function deleteUser(int $id): bool
+    {
+        $res = $this->delete($id);
+        $this->cache()->clear();
+        return $res;
     }
 }

@@ -55,7 +55,7 @@ class Controller
         $viewContent = ob_get_clean();
         
         // Check if layout is set in the view
-        if (isset($layout) && $layout !== false) {
+        if ((isset($layout) && $layout !== false) || (!isset($layout) && $this->layout !== false)) {
             $layoutName = $layout ?? $this->layout;
             $layoutPath = dirname(__DIR__, 2) . '/resources/views/' . $layoutName . '.php';
             

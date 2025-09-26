@@ -167,8 +167,8 @@ class Mailer
      */
     protected function sendWithAttachments(string $to, array $headers): bool
     {
-        // Generate boundary
-        $boundary = md5(time());
+    // Generate boundary
+    $boundary = md5((string) time());
         
         // Update content type header
         $headers[] = "Content-Type: multipart/mixed; boundary=\"{$boundary}\"";

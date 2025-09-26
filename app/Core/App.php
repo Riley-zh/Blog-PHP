@@ -78,7 +78,7 @@ class App
     {
         $logPath = $this->getConfig('logging.path', dirname(__DIR__, 2) . '/storage/logs/app.log');
         $logLevel = $this->getConfig('logging.level', 'debug');
-        
+
         $this->registerService('logger', new Logger($logPath, $logLevel));
     }
 
@@ -87,10 +87,26 @@ class App
      */
     protected function initializeCache(): void
     {
-        $cacheDir = $this->getConfig('cache.path', dirname(__DIR__, 2) . '/storage/cache');
-        $defaultTtl = $this->getConfig('cache.ttl', 3600);
-        
-        $this->registerService('cache', new Cache($cacheDir, $defaultTtl));
+        $config = $this->getConfig('cache', []);
+        $driver = $config['driver'] ?? 'file';
+
+        try {
+            if ($driver === 'redis') {
+                $redisConfig = $config['redis'] ?? [];
+                $cache = new \App\Core\RedisCache($redisConfig, $config['file']['ttl'] ?? 3600);
+            } else {
+                $fileConfig = $config['file'] ?? [];
+                $cache = new Cache($fileConfig['path'] ?? dirname(__DIR__, 2) . '/storage/cache', $fileConfig['ttl'] ?? 3600);
+            }
+        } catch (\Throwable $e) {
+            // Fallback to file cache and log
+            $logger = new Logger();
+            $logger->error('Cache initialization failed, falling back to file: ' . $e->getMessage());
+            $fileConfig = $config['file'] ?? [];
+            $cache = new Cache($fileConfig['path'] ?? dirname(__DIR__, 2) . '/storage/cache', $fileConfig['ttl'] ?? 3600);
+        }
+
+        $this->registerService('cache', $cache);
     }
 
     /**

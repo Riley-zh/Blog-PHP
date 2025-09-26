@@ -2,7 +2,9 @@
 
 namespace App\Core;
 
-class Cache
+use App\Core\Contracts\CacheInterface;
+
+class Cache implements CacheInterface
 {
     protected string $cacheDir;
     protected int $defaultTtl;

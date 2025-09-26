@@ -7,7 +7,7 @@ class FileQueue implements QueueInterface
     private string $queueDir;
     private string $queueName;
 
-    public function __construct(string $queueDir = null, string $queueName = 'default')
+    public function __construct(?string $queueDir = null, string $queueName = 'default')
     {
         $this->queueDir = $queueDir ?? dirname(__DIR__, 3) . '/storage/queues';
         $this->queueName = $queueName;

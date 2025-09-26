@@ -2,94 +2,44 @@
 
 namespace App\Core;
 
-class Logger
+use Monolog\Logger as MonoLogger;
+use Monolog\Handler\StreamHandler;
+use Psr\Log\LoggerInterface;
+
+class Logger implements LoggerInterface
 {
-    protected string $logPath;
-    protected string $logLevel;
+    protected MonoLogger $logger;
 
     public function __construct(?string $logPath = null, ?string $logLevel = null)
     {
-        $this->logPath = $logPath ?? dirname(__DIR__, 2) . '/storage/logs/app.log';
-        $this->logLevel = $logLevel ?? 'debug';
-        
-        // Create log directory if it doesn't exist
-        $logDir = dirname($this->logPath);
+        $logPath = $logPath ?? dirname(__DIR__, 2) . '/storage/logs/app.log';
+        $logDir = dirname($logPath);
         if (!is_dir($logDir)) {
             mkdir($logDir, 0755, true);
         }
-    }
 
-    /**
-     * Log a debug message
-     */
-    public function debug(string $message, array $context = []): void
-    {
-        $this->log('debug', $message, $context);
-    }
-
-    /**
-     * Log an info message
-     */
-    public function info(string $message, array $context = []): void
-    {
-        $this->log('info', $message, $context);
-    }
-
-    /**
-     * Log a warning message
-     */
-    public function warning(string $message, array $context = []): void
-    {
-        $this->log('warning', $message, $context);
-    }
-
-    /**
-     * Log an error message
-     */
-    public function error(string $message, array $context = []): void
-    {
-        $this->log('error', $message, $context);
-    }
-
-    /**
-     * Log a message
-     */
-    protected function log(string $level, string $message, array $context = []): void
-    {
-        // Check if log level is enabled
-        if (!$this->isLevelEnabled($level)) {
-            return;
+        $level = MonoLogger::DEBUG;
+        if ($logLevel) {
+            $map = [
+                'debug' => MonoLogger::DEBUG,
+                'info' => MonoLogger::INFO,
+                'warning' => MonoLogger::WARNING,
+                'error' => MonoLogger::ERROR,
+            ];
+            $level = $map[strtolower($logLevel)] ?? MonoLogger::DEBUG;
         }
 
-        // Format the message
-        $timestamp = date('Y-m-d H:i:s');
-        $formattedMessage = "[{$timestamp}] " . strtoupper($level) . ": {$message}";
-        
-        if (!empty($context)) {
-            $formattedMessage .= ' ' . json_encode($context);
-        }
-        
-        $formattedMessage .= PHP_EOL;
-
-        // Write to log file
-        file_put_contents($this->logPath, $formattedMessage, FILE_APPEND | LOCK_EX);
+        $this->logger = new MonoLogger('app');
+        $this->logger->pushHandler(new StreamHandler($logPath, $level));
     }
 
-    /**
-     * Check if log level is enabled
-     */
-    protected function isLevelEnabled(string $level): bool
-    {
-        $levels = [
-            'debug' => 0,
-            'info' => 1,
-            'warning' => 2,
-            'error' => 3
-        ];
-
-        $currentLevel = $levels[$this->logLevel] ?? 0;
-        $messageLevel = $levels[$level] ?? 0;
-
-        return $messageLevel >= $currentLevel;
-    }
+    public function emergency($message, array $context = array()): void { $this->logger->emergency($message, $context); }
+    public function alert($message, array $context = array()): void     { $this->logger->alert($message, $context); }
+    public function critical($message, array $context = array()): void  { $this->logger->critical($message, $context); }
+    public function error($message, array $context = array()): void     { $this->logger->error($message, $context); }
+    public function warning($message, array $context = array()): void   { $this->logger->warning($message, $context); }
+    public function notice($message, array $context = array()): void    { $this->logger->notice($message, $context); }
+    public function info($message, array $context = array()): void      { $this->logger->info($message, $context); }
+    public function debug($message, array $context = array()): void     { $this->logger->debug($message, $context); }
+    public function log($level, $message, array $context = array()): void { $this->logger->log($level, $message, $context); }
 }

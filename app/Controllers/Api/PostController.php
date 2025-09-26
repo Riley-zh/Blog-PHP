@@ -19,7 +19,7 @@ class PostController extends ApiController
      */
     public function index(): string
     {
-        $posts = $this->postModel->getAll();
+    $posts = $this->postModel->all();
         return $this->success('Posts retrieved successfully', $posts)->getContent();
     }
 
